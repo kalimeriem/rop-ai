@@ -35,7 +35,7 @@ model = joblib.load(model_path)
 encoder = joblib.load(encoder_path)
 features = joblib.load(features_path)
 
-print("✅ Model + encoder + features loaded")
+print(" Model + encoder + features loaded")
 
 # ================= COLUMN TYPES =================
 categorical_cols = [
