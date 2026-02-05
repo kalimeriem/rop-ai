@@ -12,6 +12,7 @@ origins = [
     "http://127.0.0.1:5501", 
     "http://127.0.0.1:8000",
     "https://rop-ai-2.onrender.com",
+    "https://kalimeriem.github.io",   
 ]
 
 app.add_middleware(
