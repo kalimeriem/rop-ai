@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import pandas as pd
-
+import os
 app = FastAPI()
 
 # ===== CORS SETTINGS =====
