@@ -24,9 +24,17 @@ app.add_middleware(
 )
 
 # ===== LOAD MODEL FILES =====
-model = joblib.load("model/xgboost_model.pkl")
-encoder = joblib.load("model/encoder.pkl")
-features = joblib.load("model/features.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, "model", "xgboost_model.pkl")
+encoder_path = os.path.join(BASE_DIR, "model", "encoder.pkl")
+features_path = os.path.join(BASE_DIR, "model", "features.pkl")
+
+model = joblib.load(model_path)
+encoder = joblib.load(encoder_path)
+features = joblib.load(features_path)
+
+
 
 print("Model + encoder loaded successfully")
 
