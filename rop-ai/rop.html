@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiWaves - ROP Prediction Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2D5BFF;
+            --primary-dark: #1a3acc;
+            --secondary: #00D9FF;
+            --bg-dark: #0A0E27;
+            --bg-card: #141B3D;
+            --bg-input: #1C2545;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A8B3CF;
+            --text-muted: #6B7694;
+            --success: #00E676;
+            --warning: #FFB800;
+            --border: #2A3456;
+            --shadow: rgba(45, 91, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background effects */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(45, 91, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(45, 91, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(45, 91, 255, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 217, 255, 0.1) 0%, transparent 40%);
+            animation: rotate 30s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 32px;
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(45, 91, 255, 0.15);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            color: var(--secondary);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .card-header {
+            margin-bottom: 32px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(45, 91, 255, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required {
+            color: var(--warning);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(45, 91, 255, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 16px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--shadow);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        /* Results Section */
+        .results-container {
+            position: sticky;
+            top: 40px;
+        }
+
+        .results-empty {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .results-empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .results-active {
+            display: none;
+        }
+
+        .results-active.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .prediction-main {
+            text-align: center;
+            padding: 48px 32px;
+            background: linear-gradient(135deg, rgba(45, 91, 255, 0.1), rgba(0, 217, 255, 0.1));
+            border-radius: 12px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+        }
+
+        .prediction-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .prediction-value {
+            font-size: 72px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .prediction-unit {
+            font-size: 24px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .confidence-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 230, 118, 0.15);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            color: var(--success);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .input-summary {
+            margin-top: 32px;
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            background: var(--bg-input);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            color: var(--text-secondary);
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .results-container {
+                position: static;
+            }
+
+            h1 {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .prediction-value {
+                font-size: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">DW</div>
+                <span>DigiWaves</span>
+            </div>
+            <nav class="nav">
+                <a href="#dashboard">Dashboard</a>
+                <a href="#predictions">Predictions</a>
+                <a href="#history">History</a>
+                <a href="#reports">Reports</a>
+            </nav>
+        </header>
+
+        <div class="hero">
+            <div class="badge">Data-Driven Precision</div>
+            <h1>
+                <span class="gradient-text">DRILLING PREDICTIONS</span><br>
+                Powered by Advanced AI
+            </h1>
+            <p class="subtitle">
+                Leveraging advanced AI models to predict Rate of Penetration (ROP) in the most demanding geological formations and challenging environments.
+            </p>
+        </div>
+
+        <div class="main-content">
+            <!-- Input Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Well Parameters</h2>
+                    <p class="card-description">Configure core attributes for real-time ROP prediction</p>
+                </div>
+<form id="ropForm">
+  <!-- Bit Configuration -->
+<div class="form-section">
+    <div class="section-title">
+        <div class="section-icon">🔧</div>
+        Bit Configuration
+    </div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Bit Model <span class="required">*</span></label>
+            <input type="text" name="bit_model" required placeholder="e.g., ABC123">
+        </div>
+        <div class="form-group">
+            <label>Bit Size <span class="required">*</span> <span class="unit">inches</span></label>
+            <input type="number" step="0.01" name="bit_size" required placeholder="e.g., 12.25">
+        </div>
+        <div class="form-group">
+            <label>Bit Type <span class="required">*</span></label>
+            <input type="text" name="bit_type" required placeholder="e.g., PDC">
+        </div>
+        <div class="form-group">
+            <label>Bit TFA <span class="required">*</span> <span class="unit">in²</span></label>
+            <input type="number" step="0.01" name="bit_tfa" required placeholder="e.g., 1.5">
+        </div>
+        <div class="form-group">
+            <label>Serial Number <span class="required">*</span></label>
+            <input type="text" name="bi_serial_number" required placeholder="e.g., SN12">
+        </div>
+        <div class="form-group">
+            <label>Manufacturer <span class="required">*</span></label>
+            <input type="text" name="Manufactor" required placeholder="e.g., SLB">
+        </div>
+        <div class="form-group">
+            <label>Bit Record ID <span class="required">*</span></label>
+            <input type="number" name="bit_record_id" required placeholder="e.g., 1001">
+        </div>
+        <div class="form-group">
+            <label>Bit Run Number <span class="required">*</span></label>
+            <input type="number" name="bit_run_number" required placeholder="e.g., 2">
+        </div>
+    </div>
+</div>
+
+<!-- Formation & Depth -->
+<div class="form-section">
+    <div class="section-title">
+        <div class="section-icon">⛰️</div>
+        Formation & Depth
+    </div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Formation <span class="required">*</span></label>
+            <input type="text" name="formation" required placeholder="e.g., cambrian">
+        </div>
+        <div class="form-group">
+            <label>Depth From <span class="required">*</span> <span class="unit">ft</span></label>
+            <input type="number" step="0.01" name="depth_from" required placeholder="e.g., 3500">
+        </div>
+        <div class="form-group">
+            <label>R Run <span class="required">*</span></label>
+            <input type="number" step="0.01" name="r_run" required placeholder="e.g., 10">
+        </div>
+    </div>
+</div>
+
+<!-- Operating Parameters -->
+<div class="form-section">
+    <div class="section-title">
+        <div class="section-icon">⚙️</div>
+        Operating Parameters
+    </div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Connection Time <span class="required">*</span> <span class="unit">min</span></label>
+            <input type="number" step="0.01" name="connection_time" required placeholder="e.g., 5">
+        </div>
+        <div class="form-group">
+            <label>RPM <span class="required">*</span> <span class="unit">rev/min</span></label>
+            <input type="number" name="rpm" required placeholder="e.g., 120">
+        </div>
+        <div class="form-group">
+            <label>Max RPM <span class="required">*</span></label>
+            <input type="number" name="rpm_max" required placeholder="e.g., 150">
+        </div>
+        <div class="form-group">
+            <label>Torque (TQA) <span class="required">*</span> <span class="unit">kft-lb</span></label>
+            <input type="number" step="0.01" name="tqa" required placeholder="e.g., 10">
+        </div>
+        <div class="form-group">
+            <label>Max Torque <span class="required">*</span></label>
+            <input type="number" step="0.01" name="tqa_max" required placeholder="e.g., 15">
+        </div>
+        <div class="form-group">
+            <label>Flow Rate <span class="required">*</span> <span class="unit">gpm</span></label>
+            <input type="number" name="flw" required placeholder="e.g., 300">
+        </div>
+        <div class="form-group">
+            <label>Max Flow Rate <span class="required">*</span></label>
+            <input type="number" name="flw_max" required placeholder="e.g., 350">
+        </div>
+        <div class="form-group">
+            <label>Pump Pressure (SPP) <span class="required">*</span> <span class="unit">psi</span></label>
+            <input type="number" name="spp" required placeholder="e.g., 200">
+        </div>
+        <div class="form-group">
+            <label>Weight on Bit (WOB) <span class="required">*</span> <span class="unit">klbs</span></label>
+            <input type="number" step="0.1" name="wob" required placeholder="e.g., 12">
+        </div>
+    </div>
+</div>
+
+<!-- Time Parameters -->
+<div class="form-section">
+    <div class="section-title">
+        <div class="section-icon">🕐</div>
+        Time Parameters
+    </div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Month <span class="required">*</span></label>
+            <input type="number" min="1" max="12" name="from_month" required placeholder="e.g., 3">
+        </div>
+        <div class="form-group">
+            <label>Day <span class="required">*</span></label>
+            <input type="number" min="1" max="31" name="from_day" required placeholder="e.g., 10">
+        </div>
+        <div class="form-group">
+            <label>Hour <span class="required">*</span></label>
+            <input type="number" min="0" max="23" name="from_hour" required placeholder="e.g., 14">
+        </div>
+    </div>
+</div>
+
+<!-- Jets & Bit Features -->
+<div class="form-section">
+    <div class="section-title">
+        <div class="section-icon">💧</div>
+        Bit Jets & Category
+    </div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Bit Jets Avg Size <span class="required">*</span> <span class="unit">1/32"</span></label>
+            <input type="number" step="0.01" name="bit_jets_avg_size" required placeholder="e.g., 0.5">
+        </div>
+        <div class="form-group">
+            <label>Bit Jets Area <span class="required">*</span> <span class="unit">in²</span></label>
+            <input type="number" step="0.01" name="bit_jets_area" required placeholder="e.g., 1.2">
+        </div>
+        <div class="form-group">
+            <label>Bit Category <span class="required">*</span></label>
+            <input type="text" name="bit_category_final" required placeholder="e.g., PDC_MATRIX_HARD">
+        </div>
+        <div class="form-group">
+            <label>Bit Technology <span class="required">*</span></label>
+            <input type="text" name="bit_technology" required placeholder="e.g., PDC_MATRIX">
+        </div>
+    </div>
+</div>
+
+          <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <span>Running prediction...</span>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="clearForm()">Clear Form</button>
+                        <button type="submit" class="btn-primary">Run Prediction</button>
+                    </div>
+</form>
+
+              
+               
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-container">
+                <div class="card">
+                    <div class="results-empty" id="resultsEmpty">
+                        <div class="results-empty-icon">📊</div>
+                        <h3>No Predictions Yet</h3>
+                        <p>Fill out the form and run a prediction to see results here</p>
+                    </div>
+
+                    <div class="results-active" id="resultsActive">
+                        <div class="card-header">
+                            <div class="badge" style="margin-bottom: 0;">LIVE PREDICTION</div>
+                            <h2 class="card-title" style="margin-top: 12px;">Modern ROP Prediction Results</h2>
+                        </div>
+
+                        <div class="prediction-main">
+                            <div class="prediction-label">Predicted Rate of Penetration</div>
+                            <div>
+                                <span class="prediction-value" id="ropValue">42.8</span>
+                                <span class="prediction-unit">m/hr</span>
+                            </div>
+                            <div class="confidence-badge">
+                                <span>●</span>
+                                <span>High Confidence Model</span>
+                            </div>
+                        </div>
+
+                        <div class="input-summary">
+                            <div class="summary-title">Input Attribute Breakdown</div>
+                            <div class="summary-grid">
+                                <div class="summary-item">
+                                    <div class="summary-label">Weight on Bit (WOB)</div>
+                                    <div class="summary-value" id="summaryWob">-</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Rotary Speed (RPM)</div>
+                                    <div class="summary-value" id="summaryRpm">-</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Flow Rate</div>
+                                    <div class="summary-value" id="summaryFlw">-</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Surface Torque</div>
+                                    <div class="summary-value" id="summaryTqa">-</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Pump Pressure</div>
+                                    <div class="summary-value" id="summarySpp">-</div>
+                                </div>
+                                <div class="summary-item">
+                                    <div class="summary-label">Formation Type</div>
+                                    <div class="summary-value" id="summaryFormation">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="button-group" style="margin-top: 32px;">
+                            <button type="button" class="btn-primary" onclick="exportResults()">Export PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    // API endpoint
+    const API_URL = 'http://127.0.0.1:8000/predict';
+
+    // Fields that should be treated as numbers
+    const numericFields = [
+        'bit_size','bit_tfa','bit_record_id','depth_from','bit_run_number','r_run',
+        'connection_time','rpm','rpm_max','tqa','tqa_max','flw','flw_max','spp','wob','wob_max',
+        'WELL_Name_id','location_id','from_month','from_day','from_hour','bit_jets_avg_size','bit_jets_area'
+    ];
+
+    // Form submission handler
+    document.getElementById('ropForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = {};
+
+        // Convert form data to correct types
+        for (let [key, value] of formData.entries()) {
+            data[key] = numericFields.includes(key) ? parseFloat(value) : value;
+        }
+
+        // Show loading
+        document.getElementById('loading').classList.add('show');
+        document.querySelector('.btn-primary[type="submit"]').disabled = true;
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            // Update UI with results
+            displayResults(result.ROP_prediction, data);
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to get prediction. Please check if the API is running and accessible.\n\nError: ' + error.message);
+        } finally {
+            // Hide loading
+            document.getElementById('loading').classList.remove('show');
+            document.querySelector('.btn-primary[type="submit"]').disabled = false;
+        }
+    });
+
+    function displayResults(ropValue, inputData) {
+        // Hide empty state, show results
+        document.getElementById('resultsEmpty').style.display = 'none';
+        document.getElementById('resultsActive').classList.add('show');
+
+        // Update ROP value
+        document.getElementById('ropValue').textContent = ropValue.toFixed(2);
+
+        // Update summary values
+        document.getElementById('summaryWob').textContent = inputData.wob.toFixed(1) + ' KLBS';
+        document.getElementById('summaryRpm').textContent = inputData.rpm + ' REV/MIN';
+        document.getElementById('summaryFlw').textContent = inputData.flw + ' GPM';
+        document.getElementById('summaryTqa').textContent = inputData.tqa.toFixed(1) + ' KFT-LB';
+        document.getElementById('summarySpp').textContent = inputData.spp + ' PSI';
+        document.getElementById('summaryFormation').textContent = inputData.formation;
+    }
+
+    function clearForm() {
+        document.getElementById('ropForm').reset();
+        document.getElementById('resultsEmpty').style.display = 'block';
+        document.getElementById('resultsActive').classList.remove('show');
+    }
+function exportResults() {
+    const resultsSection = document.getElementById('resultsActive');
+
+    if (!resultsSection.classList.contains('show')) {
+        alert('No results to export yet. Run a prediction first.');
+        return;
+    }
+
+    // Create container
+    const pdfContent = document.createElement('div');
+    pdfContent.style.padding = '30px';
+    pdfContent.style.fontFamily = 'Arial, sans-serif';
+    pdfContent.style.color = '#000';
+    pdfContent.style.background = '#fff';
+    pdfContent.style.width = '800px';
+
+    // Make it invisible but keep it in the document flow
+    pdfContent.style.position = 'fixed';
+    pdfContent.style.top = '0';
+    pdfContent.style.left = '0';
+    pdfContent.style.opacity = '0';
+    pdfContent.style.pointerEvents = 'none';
+    pdfContent.style.zIndex = '-9999';
+
+    document.body.appendChild(pdfContent);
+
+    // Title
+    pdfContent.innerHTML = `
+        <h1 style="text-align:center;">ROP Prediction Report</h1>
+        <hr>
+        <h2>Prediction Result</h2>
+        <p style="font-size:20px;">
+            Predicted ROP: <b>${document.getElementById('ropValue').textContent} ft/hr</b>
+        </p>
+
+        <h2>Input Parameters</h2>
+        <table border="1" cellspacing="0" cellpadding="8" width="100%">
+            <tr><td>WOB</td><td>${document.getElementById('summaryWob').textContent}</td></tr>
+            <tr><td>RPM</td><td>${document.getElementById('summaryRpm').textContent}</td></tr>
+            <tr><td>Flow Rate</td><td>${document.getElementById('summaryFlw').textContent}</td></tr>
+            <tr><td>Torque</td><td>${document.getElementById('summaryTqa').textContent}</td></tr>
+            <tr><td>Pump Pressure</td><td>${document.getElementById('summarySpp').textContent}</td></tr>
+            <tr><td>Formation</td><td>${document.getElementById('summaryFormation').textContent}</td></tr>
+        </table>
+    `;
+
+    // Wait for DOM render
+    setTimeout(() => {
+        html2pdf()
+            .set({
+                margin: 10,
+                filename: 'ROP_Prediction_Report.pdf',
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            })
+            .from(pdfContent)
+            .save()
+            .then(() => {
+                pdfContent.remove();
+            });
+
+    }, 500);
+}
+    // Smooth scroll for navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
